@@ -72,7 +72,7 @@ CODE:
   } catch (TException &e) {
     croak("TException: %s", e.what());
   }
-  const char *CLASS = "Net::Cassandra::libcassandra";
+  const char *CLASS = (char*)"Net::Cassandra::libcassandra";
   RETVAL = new Cassandra(client, in_host, in_port);
 OUTPUT:
   RETVAL
@@ -89,7 +89,7 @@ Cassandra::getTokenMap(bool fresh)
 Keyspace *
 Cassandra::getKeyspace(const string name)
 CODE:
-  const char *CLASS = "Net::Cassandra::libcassandra::Keyspace";
+  const char *CLASS = (char*)"Net::Cassandra::libcassandra::Keyspace";
   RETVAL = THIS->getKeyspace(name);
 OUTPUT:
   RETVAL
@@ -211,7 +211,7 @@ CODE:
 Column *
 xs_cassandra_keyspace_getColumn(Keyspace *ks, const string key, const string column_family, const string super_column_name, const string column_name)
 CODE:
-  const char *CLASS = (char*)"Net::Cassandra::libcassandra::Column";
+  const char *CLASS = (char*)(char*)"Net::Cassandra::libcassandra::Column";
   try {
     Column gotColumn = ks->getColumn(key, column_family, super_column_name, column_name);
     Column* retColumn;
@@ -239,7 +239,7 @@ OUTPUT:
 Column *
 xs_cassandra_keyspace_getColumn2(Keyspace *ks, const string key, const string column_family, const string column_name)
 CODE:
-  const char *CLASS = "Net::Cassandra::libcassandra::Column";
+  const char *CLASS = (char*)"Net::Cassandra::libcassandra::Column";
   try {
     Column gotColumn = ks->getColumn(key, column_family, "", column_name);
     Column* retColumn;
@@ -309,7 +309,7 @@ OUTPUT:
 SuperColumn *
 xs_cassandra_keyspace_getSuperColumn(Keyspace *ks, const string key, const string column_family, const string super_column_name)
 CODE:
-  char *CLASS = "Net::Cassandra::libcassandra::SuperColumn";
+  char *CLASS = (char*)"Net::Cassandra::libcassandra::SuperColumn";
   try {
     RETVAL = &(ks->getSuperColumn(key, column_family, super_column_name));
   } catch (InvalidRequestException &e) {
