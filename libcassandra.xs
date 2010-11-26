@@ -311,7 +311,21 @@ xs_cassandra_keyspace_getSuperColumn(Keyspace *ks, const string key, const strin
 CODE:
   char *CLASS = (char*)"Net::Cassandra::libcassandra::SuperColumn";
   try {
-    RETVAL = &(ks->getSuperColumn(key, column_family, super_column_name));
+    SuperColumn gotSuperColumn = ks->getSuperColumn(key, column_family, super_column_name);
+    SuperColumn* retSuperColumn;
+    retSuperColumn = new SuperColumn();
+    retSuperColumn->name = gotSuperColumn.name;
+    Column* newColumn;
+    vector<Column>::iterator it = gotSuperColumn.columns.begin();
+    while( it != gotSuperColumn.columns.end() ) {
+        newColumn = new Column();
+        newColumn->name = it->name;
+        newColumn->value = it->value;
+        retSuperColumn->columns.push_back(*newColumn);
+	it++;
+    }
+    RETVAL = retSuperColumn;
+
   } catch (InvalidRequestException &e) {
     croak("InvalidRequestException: %s", e.what());
   } catch (UnavailableException &e) {
@@ -430,5 +444,19 @@ unsigned long
 xs_cassandra_column_getTimestamp(Column* co)
 CODE:
   RETVAL = (unsigned long)co->timestamp;
+OUTPUT:
+  RETVAL
+
+string
+xs_cassandra_supercolumn_getName(SuperColumn* sc)
+CODE:
+  RETVAL = sc->name;
+OUTPUT:
+  RETVAL
+
+ColumnVector
+xs_cassandra_supercolumn_getColumns(SuperColumn* sc)
+CODE:
+    RETVAL = sc->columns;
 OUTPUT:
   RETVAL
