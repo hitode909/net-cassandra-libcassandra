@@ -399,3 +399,24 @@ CODE:
   }
 OUTPUT:
   RETVAL
+
+string
+xs_cassandra_column_getName(Column* co)
+CODE:
+  RETVAL = co->name;
+OUTPUT:
+  RETVAL
+
+string
+xs_cassandra_column_getValue(Column* co)
+CODE:
+  RETVAL = co->value;
+OUTPUT:
+  RETVAL
+
+unsigned long
+xs_cassandra_column_getTimestamp(Column* co)
+CODE:
+  RETVAL = (unsigned long)co->timestamp;
+OUTPUT:
+  RETVAL

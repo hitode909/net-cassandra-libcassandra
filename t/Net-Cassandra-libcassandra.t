@@ -61,6 +61,31 @@ sub set_get_delete_value : Test(2) {
     is ($res_not_exist, undef);
 }
 
+sub set_get_delete_column : Test(4) {
+    use Net::Cassandra::libcassandra;
+    my $self = shift;
+    $self->{cassandra} = Net::Cassandra::libcassandra::new('localhost', 9160);
+    use Data::Dumper; warn Dumper $self->{cassandra};
+    my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
+    my $key = rand;
+    my $name = rand;
+    my $value = rand;
+    $keyspace->insertColumn($key, "Standard1", "", $name, $value);
+
+    my $res = $keyspace->getColumn($key, "Standard1", "", $name);
+
+    is($res->value, $value);
+    is($res->name, $name);
+    ok(abs($res->timestamp / 10**8) - time < 2);
+
+    $keyspace->remove($key, "Standard1", "", $name);
+
+    my $res_not_exist = eval {
+        $keyspace->getColumnValue($key, "Standard1", "", $name);
+    };
+    is ($res_not_exist, undef);
+}
+
 __PACKAGE__->runtests;
 
 1;

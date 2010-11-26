@@ -4,6 +4,7 @@ use 5.008008;
 use strict;
 use warnings;
 use Net::Cassandra::libcassandra::Keyspace;
+use Net::Cassandra::libcassandra::Column;
 
 require Exporter;
 
