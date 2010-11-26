@@ -211,9 +211,15 @@ CODE:
 Column *
 xs_cassandra_keyspace_getColumn(Keyspace *ks, const string key, const string column_family, const string super_column_name, const string column_name)
 CODE:
-  const char *CLASS = "Net::Cassandra::libcassandra::Column";
+  const char *CLASS = (char*)"Net::Cassandra::libcassandra::Column";
   try {
-    RETVAL = &(ks->getColumn(key, column_family, super_column_name, column_name));
+    Column gotColumn = ks->getColumn(key, column_family, super_column_name, column_name);
+    Column* retColumn;
+    retColumn = new Column();
+    retColumn->name = gotColumn.name;
+    retColumn->value = gotColumn.value;
+    retColumn->timestamp = gotColumn.timestamp;
+    RETVAL = retColumn;
   } catch (InvalidRequestException &e) {
     croak("InvalidRequestException: %s", e.what());
   } catch (UnavailableException &e) {
@@ -235,7 +241,13 @@ xs_cassandra_keyspace_getColumn2(Keyspace *ks, const string key, const string co
 CODE:
   const char *CLASS = "Net::Cassandra::libcassandra::Column";
   try {
-    RETVAL = &(ks->getColumn(key, column_family, "", column_name));
+    Column gotColumn = ks->getColumn(key, column_family, "", column_name);
+    Column* retColumn;
+    retColumn = new Column();
+    retColumn->name = gotColumn.name;
+    retColumn->value = gotColumn.value;
+    retColumn->timestamp = gotColumn.timestamp;
+    RETVAL = retColumn;
   } catch (InvalidRequestException &e) {
     croak("InvalidRequestException: %s", e.what());
   } catch (UnavailableException &e) {
