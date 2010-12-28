@@ -60,9 +60,8 @@ sub set_get_delete_value : Test(2) {
     is ($res_not_exist, undef);
 }
 
-sub set_get_count_delete_value : Test(6) {
+sub count_column : Test(5) {
     my $self = shift;
-    $self->{cassandra} = Net::Cassandra::libcassandra::new('localhost', 9160);
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
     my $key = rand;
 
@@ -72,11 +71,22 @@ sub set_get_count_delete_value : Test(6) {
 
     my $count = $keyspace->getCount($key, "Standard1", "");
     is($count, 5);
+}
+
+sub count_super_column : Tests {
+    my $self = shift;
+    my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
+    my $key = rand;
 
     for(1..5) {
-        $keyspace->remove($key, "Standard1", "", $_);
-        is($keyspace->getCount($key, "Standard1", ""), 5 - $_);
+        $keyspace->insertColumn($key, "Super1", "super_column".$_ , 'name'.$_, 'value'.$_);
     }
+
+    my $count = $keyspace->getCount($key, "Super1", '');
+    is($count, 5);
+
+    $count = $keyspace->getCount($key, "Super1", "super_column3");
+    is($count, 1);
 }
 
 sub set_get_delete_column : Test(4) {

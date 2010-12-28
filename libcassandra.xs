@@ -391,6 +391,9 @@ CODE:
     ColumnParent* col_parent = new ColumnParent();
     col_parent->column_family = column_family;
     col_parent->super_column = super_column;
+    if (super_column.length() > 0) {
+        col_parent->__isset.super_column = true;
+    }
     RETVAL = ks->getCount(key, *col_parent);
   } catch (InvalidRequestException &e) {
     croak("InvalidRequestException: %s", e.what());
