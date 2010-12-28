@@ -13,7 +13,7 @@ sub _use: Test(setup => 1) {
     use_ok 'Net::Cassandra::libcassandra'
 }
 
-sub test_connect : Test(startup => 1) {
+sub test_connect : Test(setup => 1) {
     my $self = shift;
     $self->{cassandra} = Net::Cassandra::libcassandra::new('localhost', 9160);
     isa_ok($self->{cassandra}, 'Net::Cassandra::libcassandra');
@@ -60,16 +60,19 @@ sub set_get_delete_value : Test(2) {
     is ($res_not_exist, undef);
 }
 
-sub count_column : Test(5) {
+sub count_column : Test(2) {
     my $self = shift;
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
     my $key = rand;
+
+    my $count = $keyspace->getCount($key, "Standard1", "");
+    is($count, 0);
 
     for(1..5) {
         $keyspace->insertColumn($key, "Standard1", "", $_, $_);
     }
 
-    my $count = $keyspace->getCount($key, "Standard1", "");
+    $count = $keyspace->getCount($key, "Standard1", "");
     is($count, 5);
 }
 
