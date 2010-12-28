@@ -385,9 +385,12 @@ OUTPUT:
   RETVAL
 
 int
-xs_cassandra_keyspace_getCount(Keyspace *ks, const string key, const ColumnParent *col_parent)
+xs_cassandra_keyspace_getCount(Keyspace *ks, const string key, const string column_family, const string super_column)
 CODE:
   try {
+    ColumnParent* col_parent = new ColumnParent();
+    col_parent->column_family = column_family;
+    col_parent->super_column = super_column;
     RETVAL = ks->getCount(key, *col_parent);
   } catch (InvalidRequestException &e) {
     croak("InvalidRequestException: %s", e.what());

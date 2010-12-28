@@ -67,8 +67,8 @@ sub getSliceRange {
 }
 
 sub getCount {
-    my ($self, $key, $col_parent) = @_;
-    Net::Cassandra::libcassandra::keyspace_getCount($self, $key, $col_parent);
+    my ($self, $key, $column_family, $super_column) = @_;
+    Net::Cassandra::libcassandra::keyspace_getCount($self, $key, $column_family, $super_column);
 }
 
 sub getName {
