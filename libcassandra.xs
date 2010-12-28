@@ -338,9 +338,22 @@ OUTPUT:
   RETVAL
 
 ColumnVector
-xs_cassandra_keyspace_getSliceRange(Keyspace *ks, const string key, const ColumnParent *col_parent, SlicePredicate *pred)
+xs_cassandra_keyspace_getSliceRange(Keyspace *ks, const string key, const string column_family, const string super_column, const string start, const string finish, int reversed, int count)
 CODE:
   try {
+     /* StringVector column_names */
+    ColumnParent* col_parent = new ColumnParent();
+    col_parent->column_family = column_family;
+    col_parent->super_column = super_column;
+    if (super_column.length() > 0) {
+        col_parent->__isset.super_column = true;
+    }
+
+    SlicePredicate *pred = new SlicePredicate();
+    pred->slice_range.start = start;
+    pred->slice_range.finish = finish;
+    pred->slice_range.reversed = reversed;
+    pred->slice_range.count = count;
     RETVAL = ks->getSliceRange(key, *col_parent, *pred);
   } catch (InvalidRequestException &e) {
     croak("InvalidRequestException: %s", e.what());

@@ -180,13 +180,17 @@ T_COLUMN_VECTOR
             XSRETURN_UNDEF;
         }
 
-        AV *av = (AV *)sv_2mortal((SV *)newAV());
-	for(ColumnVectorIt it = $var.begin(); it != $var.end(); it++) {
-            SV *sv;
-	    sv_setref_pv( sv, "org::apache::cassandra::Column", &it );
-            av_push(av, sv);
+        AV *columns = (AV *)sv_2mortal((SV *)newAV());
+        for(ColumnVectorIt it = $var.begin(); it != $var.end(); it++) {
+            HV *column = (HV *)sv_2mortal((SV *)newHV());
+            hv_store(column, "value", strlen("value"), newSVpv(it->value.c_str(), it->value.size()), 0);
+            hv_store(column, "name", strlen("name"), newSVpv(it->name.c_str(), it->name.size()), 0);
+            hv_store(column, "timestamp", strlen("timestamp"), newSViv(it->timestamp), 0);
+
+            sv_bless( newRV_noinc((SV*)column), gv_stashpv( "Net::Cassandra::libcassandra::Column", 1 ));
+            av_push(columns, newRV((SV *)column));
         }
-        SvSetSV($arg, newRV_noinc((SV *)av));
+        SvSetSV($arg, newRV_noinc((SV *)columns));
     }
 
 T_COLUMN_OR_SUPER_COLUMN_VECTOR

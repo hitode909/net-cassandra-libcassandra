@@ -134,6 +134,40 @@ sub get_super_column : Test(23) {
     ok($res->columns);
 }
 
+sub slice_standard_column : Test(5) {
+    my $self = shift;
+    my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
+    my $key = rand;
+    for(0..4) {
+        $keyspace->insertColumn($key, "Standard1", "", 'name'.$_, 'value'.$_);
+    }
+    my $res = $keyspace->getSliceRange($key, "Standard1", "", "", "", 0, 3);
+    isa_ok $res->[0], 'Net::Cassandra::libcassandra::Column';
+    is scalar @$res, 3;
+    is $res->[0]->name, 'name0';
+    is $res->[1]->name, 'name1';
+    is $res->[2]->name, 'name2';
+}
+
+sub slice_super_column_column : Tests {
+    my $self = shift;
+    my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
+    my $key = rand;
+    for(0..4) {
+        $keyspace->insertColumn($key, "Super1", "super_column".$_ , 'name1-'.$_, 'value1-'.$_);
+        $keyspace->insertColumn($key, "Super1", "super_column".$_ , 'name2-'.$_, 'value2-'.$_);
+    }
+    my $res = $keyspace->getSliceRange($key, "Super1", "super_column0", "", "", 0, 3);
+    ok $res;
+    is scalar @$res, 2;
+    isa_ok $res->[0], 'Net::Cassandra::libcassandra::Column';
+    is $res->[0]->value, 'value1-0';
+}
+
+sub slice_super_column_super_column : Tests {
+    local $TODO = 'not implemented';
+}
+
 __PACKAGE__->runtests;
 
 1;
