@@ -91,7 +91,7 @@ sub count_super_column : Tests {
     is($count, 1);
 }
 
-sub set_get_delete_column : Test(4) {
+sub get_column : Test(4) {
     my $self = shift;
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
     my $key = rand;
@@ -101,16 +101,37 @@ sub set_get_delete_column : Test(4) {
 
     my $res = $keyspace->getColumn($key, "Standard1", "", $name);
 
-    is($res->value, $value);
-    is($res->name, $name);
-    ok(abs($res->timestamp / 10**8) - time < 2);
+    is($res->value, $value, 'value');
+    is($res->name, $name, 'name');
+    ok(abs($res->timestamp / 10**8) - time < 1, 'timestamp');
 
     $keyspace->remove($key, "Standard1", "", $name);
 
     my $res_not_exist = eval {
         $keyspace->getColumnValue($key, "Standard1", "", $name);
     };
-    is ($res_not_exist, undef);
+    is ($res_not_exist, undef, 'deleted');
+}
+
+sub get_super_column : Test(23) {
+    my $self = shift;
+    my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
+    my $key = rand;
+    my $super_column_name = rand;
+    for(0..4) {
+        $keyspace->insertColumn($key, "Super1", $super_column_name, 'name'.$_, 'value'.$_);
+    }
+
+    my $res = $keyspace->getSuperColumn($key, "Super1", $super_column_name);
+    isa_ok $res, 'Net::Cassandra::libcassandra::SuperColumn';
+    is $res->name, $super_column_name;
+    for(0..4) {
+        isa_ok $res->columns->[$_], 'Net::Cassandra::libcassandra::Column';
+        is $res->columns->[$_]->name, 'name'.$_, 'name';
+        is $res->columns->[$_]->value, 'value'.$_, 'value';
+        ok abs($res->columns->[$_]->timestamp / 10**8) - time < 1, 'timestamp';
+    }
+    ok($res->columns);
 }
 
 __PACKAGE__->runtests;

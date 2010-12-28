@@ -7,17 +7,17 @@ use Net::Cassandra::libcassandra;
 
 sub value {
     my ($self) = @_;
-    Net::Cassandra::libcassandra::column_getValue($self);
+    $self->{value};
 }
 
 sub name {
     my ($self) = @_;
-    Net::Cassandra::libcassandra::column_getName($self);
+    $self->{name};
 }
 
 sub timestamp {
     my ($self) = @_;
-    Net::Cassandra::libcassandra::column_getTimestamp($self);
+    $self->{timestamp};
 }
 
 1;

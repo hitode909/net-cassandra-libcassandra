@@ -3,8 +3,8 @@ Cassandra * O_OBJECT
 CassandraClient * O_OBJECT
 Keyspace * O_OBJECT
 ColumnPath * O_OBJECT
-Column * O_OBJECT
-SuperColumn * O_OBJECT
+Column T_COLUMN
+SuperColumn T_SUPER_COLUMN
 ColumnVector T_COLUMN_VECTOR
 ColumnOrSuperColumnVector T_COLUMN_OR_SUPER_COLUMN_VECTOR
 ColumnParent * O_OBJECT
@@ -19,6 +19,12 @@ const string T_STDSTRING
 INPUT
 T_STDSTRING
   $var = string(SvPV_nolen($arg));
+
+T_COLUMN
+  $var = &PL_sv_undef;
+
+T_SUPER_COLUMN
+  $var = &PL_sv_undef;
 
 T_STRING_SET
     {
@@ -118,6 +124,40 @@ T_STRING_MAP
 OUTPUT
 T_STDSTRING
   sv_setpvn($arg, $var.c_str(), $var.size());
+
+T_COLUMN
+    {
+        HV *stash = (HV *)sv_2mortal((SV *)newHV());
+        hv_store(stash, "value", strlen("value"), newSVpv($var.value.c_str(), $var.value.size()), 0);
+        hv_store(stash, "name", strlen("name"), newSVpv($var.name.c_str(), $var.name.size()), 0);
+        hv_store(stash, "timestamp", strlen("timestamp"), newSViv($var.timestamp), 0);
+
+        sv_bless( newRV_noinc((SV*)stash), gv_stashpv( "Net::Cassandra::libcassandra::Column", 1 ));
+        SvSetSV($arg, newRV_noinc((SV *)stash));
+    }
+
+T_SUPER_COLUMN
+    {
+        HV *stash = (HV *)sv_2mortal((SV *)newHV());
+        hv_store(stash, "name", strlen("name"), newSVpv($var.name.c_str(), $var.name.size()), 0);
+
+        AV *columns = (AV *)sv_2mortal((SV *)newAV());
+
+	for(ColumnVectorIt it = $var.columns.begin(); it != $var.columns.end(); it++) {
+            HV *column = (HV *)sv_2mortal((SV *)newHV());
+            hv_store(column, "value", strlen("value"), newSVpv(it->value.c_str(), it->value.size()), 0);
+            hv_store(column, "name", strlen("name"), newSVpv(it->name.c_str(), it->name.size()), 0);
+            hv_store(column, "timestamp", strlen("timestamp"), newSViv(it->timestamp), 0);
+
+            sv_bless( newRV_noinc((SV*)column), gv_stashpv( "Net::Cassandra::libcassandra::Column", 1 ));
+            av_push(columns, newRV((SV *)column));
+        }
+
+        hv_store(stash, "columns", strlen("columns"), newRV((SV *)columns), 0);
+
+        sv_bless( newRV_noinc((SV*)stash), gv_stashpv( "Net::Cassandra::libcassandra::SuperColumn", 1 ));
+        SvSetSV($arg, newRV_noinc((SV *)stash));
+    }
 
 T_STRING_SET
     {

@@ -7,12 +7,12 @@ use Net::Cassandra::libcassandra;
 
 sub name {
     my ($self) = @_;
-    Net::Cassandra::libcassandra::supercolumn_getName($self);
+    $self->{name};
 }
 
 sub columns {
     my ($self) = @_;
-    Net::Cassandra::libcassandra::supercolumn_getColumns($self);
+    $self->{columns};
 }
 
 1;
