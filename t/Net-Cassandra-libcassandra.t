@@ -9,16 +9,15 @@ use Test::More;
 
 my $cassnadra;
 
-sub _use: Test(1) {
+sub _use: Test(setup => 1) {
     use_ok 'Net::Cassandra::libcassandra'
 }
 
-sub test_connect : Test(1) {
+sub test_connect : Test(startup => 1) {
     my $self = shift;
     $self->{cassandra} = Net::Cassandra::libcassandra::new('localhost', 9160);
     isa_ok($self->{cassandra}, 'Net::Cassandra::libcassandra');
 }
-
 
 
 sub test_connect_to_nonexist_server : Test(1) {
