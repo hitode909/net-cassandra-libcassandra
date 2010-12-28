@@ -42,7 +42,6 @@ sub test_get_nonexist_column : Test(1) {
 
 sub set_get_delete_value : Test(2) {
     my $self = shift;
-    $self->{cassandra} = Net::Cassandra::libcassandra::new('localhost', 9160);
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
     my $key = rand;
     my $name = rand;
@@ -93,10 +92,7 @@ sub count_super_column : Tests {
 }
 
 sub set_get_delete_column : Test(4) {
-    use Net::Cassandra::libcassandra;
     my $self = shift;
-    $self->{cassandra} = Net::Cassandra::libcassandra::new('localhost', 9160);
-    use Data::Dumper; warn Dumper $self->{cassandra};
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
     my $key = rand;
     my $name = rand;
