@@ -16,39 +16,17 @@ sub insertColumn {
 
 sub remove {
     my ($self, $key, $cf, $scn, $cn) = @_;
-    unless($cn){
-        Net::Cassandra::libcassandra::keyspace_remove($self, $key, $cf);
-    } else {
-        Net::Cassandra::libcassandra::keyspace_remove2($self, $key, $cf, $scn, $cn);
-    }
-}
-
-sub removeColumn {
-    my ($self, $key, $cf, $scn, $cn) = @_;
-    Net::Cassandra::libcassandra::keyspace_removeColumn($self, $key, $cf, $scn, $cn);
-}
-
-sub removeSuperColumn {
-    my ($self, $key, $cf, $scn) = @_;
-    Net::Cassandra::libcassandra::keyspace_removeSuperColumn($self, $key, $cf, $scn);
+    Net::Cassandra::libcassandra::keyspace_remove($self, $key, $cf, $scn, $cn);
 }
 
 sub getColumn {
     my ($self, $key, $cf, $scn, $cn) = @_;
-    unless($cn){
-        Net::Cassandra::libcassandra::keyspace_getColumn2($self, $key, $cf, $scn);
-    } else {
-        Net::Cassandra::libcassandra::keyspace_getColumn($self, $key, $cf, $scn, $cn);
-    }
+    Net::Cassandra::libcassandra::keyspace_getColumn($self, $key, $cf, $scn, $cn);
 }
 
 sub getColumnValue {
     my ($self, $key, $cf, $scn, $cn) = @_;
-    unless($cn){
-        Net::Cassandra::libcassandra::keyspace_getColumnValue2($self, $key, $cf, $scn);
-    } else {
-        Net::Cassandra::libcassandra::keyspace_getColumnValue($self, $key, $cf, $scn, $cn);
-    }
+    Net::Cassandra::libcassandra::keyspace_getColumnValue($self, $key, $cf, $scn, $cn);
 }
 
 sub getSuperColumn {
