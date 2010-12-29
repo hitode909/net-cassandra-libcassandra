@@ -7,11 +7,7 @@ use Net::Cassandra::libcassandra;
 
 sub insertColumn {
     my ($self, $key, $cf, $scn, $cn, $value) = @_;
-    unless($value){
-        Net::Cassandra::libcassandra::keyspace_insertColumn2($self, $key, $cf, $scn, $cn);
-    } else {
-        Net::Cassandra::libcassandra::keyspace_insertColumn($self, $key, $cf, $scn, $cn, $value);
-    }
+    Net::Cassandra::libcassandra::keyspace_insertColumn($self, $key, $cf, $scn, $cn, $value);
 }
 
 sub remove {
