@@ -19,7 +19,6 @@ sub test_connect : Test(setup => 1) {
     isa_ok($self->{cassandra}, 'Net::Cassandra::libcassandra');
 }
 
-
 sub test_connect_to_nonexist_server : Test(1) {
     my $cassandra_non;
     eval {
@@ -29,18 +28,18 @@ sub test_connect_to_nonexist_server : Test(1) {
     is($cassandra_non, undef);
 }
 
-sub test_get_nonexist_column : Test(1) {
+sub test_get_nonexist_column : Test(2) {
     my $self = shift;
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
 
     my $res_not_exist = eval {
         $keyspace->getColumnValue("key", "Standard1", "", "not_exist_column");
     };
-    warn $@ if $@;
+    like $@, qr/NotFoundException/;
     is ($res_not_exist, undef);
 }
 
-sub set_get_delete_value : Test(2) {
+sub test_get_column_value : Test(1) {
     my $self = shift;
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
     my $key = rand;
@@ -50,16 +49,9 @@ sub set_get_delete_value : Test(2) {
 
     my $res = $keyspace->getColumnValue($key, "Standard1", "", $name);
     is($res, $value);
-
-    $keyspace->remove($key, "Standard1", "", $name);
-
-    my $res_not_exist = eval {
-        $keyspace->getColumnValue($key, "Standard1", "", $name);
-    };
-    is ($res_not_exist, undef);
 }
 
-sub remove_column : Test(3) {
+sub test_remove_column : Test(3) {
     my $self = shift;
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
     my $key = rand;
@@ -79,7 +71,7 @@ sub remove_column : Test(3) {
     is ($res_not_exist, undef);
 }
 
-sub remove_super_column : Test(3) {
+sub test_remove_super_column : Test(3) {
     my $self = shift;
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
     my $key = rand;
@@ -100,7 +92,7 @@ sub remove_super_column : Test(3) {
     is ($res_not_exist, undef);
 }
 
-sub count_column : Test(2) {
+sub test_count_column : Test(2) {
     my $self = shift;
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
     my $key = rand;
@@ -116,7 +108,7 @@ sub count_column : Test(2) {
     is($count, 5);
 }
 
-sub count_super_column : Tests {
+sub test_count_super_column : Tests {
     my $self = shift;
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
     my $key = rand;
@@ -132,7 +124,7 @@ sub count_super_column : Tests {
     is($count, 1);
 }
 
-sub get_column : Test(4) {
+sub test_get_column : Test(4) {
     my $self = shift;
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
     my $key = rand;
@@ -154,7 +146,7 @@ sub get_column : Test(4) {
     is ($res_not_exist, undef, 'deleted');
 }
 
-sub get_super_column : Test(23) {
+sub test_get_super_column : Test(23) {
     my $self = shift;
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
     my $key = rand;
@@ -175,7 +167,7 @@ sub get_super_column : Test(23) {
     ok($res->columns);
 }
 
-sub slice_standard_column : Test(5) {
+sub test_slice_standard_column : Test(5) {
     my $self = shift;
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
     my $key = rand;
@@ -188,9 +180,25 @@ sub slice_standard_column : Test(5) {
     is $res->[0]->name, 'name0';
     is $res->[1]->name, 'name1';
     is $res->[2]->name, 'name2';
+
 }
 
-sub slice_super_column_column : Tests {
+sub test_slice_standard_column_reverse : Test(5) {
+    my $self = shift;
+    my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
+    my $key = rand;
+    for(0..4) {
+        $keyspace->insertColumn($key, "Standard1", "", 'name'.$_, 'value'.$_);
+    }
+    my $res = $keyspace->getSliceRange($key, "Standard1", "", "", "", 1, 3);
+    isa_ok $res->[0], 'Net::Cassandra::libcassandra::Column';
+    is scalar @$res, 3;
+    is $res->[0]->name, 'name4';
+    is $res->[1]->name, 'name3';
+    is $res->[2]->name, 'name2';
+}
+
+sub test_slice_super_column_column : Tests {
     my $self = shift;
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
     my $key = rand;
@@ -205,7 +213,7 @@ sub slice_super_column_column : Tests {
     is $res->[0]->value, 'value1-0';
 }
 
-sub slice_super_column_super_column : Tests {
+sub test_slice_super_column_super_column : Tests {
     my $self = shift;
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
     my $key = rand;
@@ -221,7 +229,7 @@ sub slice_super_column_super_column : Tests {
     is $res->[0]->columns->[0]->value, 'value1-0';
 }
 
-sub description : Test(7) {
+sub test_description : Test(7) {
     my $self = shift;
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
     my $description = $keyspace->getDescription;
