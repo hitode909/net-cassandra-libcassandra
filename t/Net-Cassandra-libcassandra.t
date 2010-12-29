@@ -180,6 +180,19 @@ sub slice_super_column_super_column : Tests {
     is $res->[0]->columns->[0]->value, 'value1-0';
 }
 
+sub description : Test(7) {
+    my $self = shift;
+    my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
+    my $description = $keyspace->getDescription;
+    ok $description;
+    ok $description->{Standard1};
+    ok $description->{Super1};
+    is $description->{Standard1}->{Type}, 'Standard';
+    is $description->{Standard1}->{CompareWith}, 'org.apache.cassandra.db.marshal.BytesType';
+    is $description->{Super2}->{Type}, 'Super';
+    is $description->{Super2}->{CompareWith}, 'org.apache.cassandra.db.marshal.UTF8Type';
+}
+
 __PACKAGE__->runtests;
 
 1;

@@ -81,4 +81,9 @@ sub getName {
     Net::Cassandra::libcassandra::keyspace_getName($self);
 }
 
+sub getDescription {
+    my ($self) = @_;
+    Net::Cassandra::libcassandra::keyspace_getDescription($self);
+}
+
 1;

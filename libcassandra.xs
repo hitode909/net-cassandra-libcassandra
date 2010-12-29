@@ -46,6 +46,9 @@ typedef StringSet::iterator StringSetIt;
 typedef map<string, string> StringMap;
 typedef StringMap::iterator StringMapIt;
 
+typedef map< string, map<string, string> > StringMapMap;
+typedef StringMapMap::iterator StringMapMapIt;
+
 typedef vector<Column> ColumnVector;
 typedef ColumnVector::iterator ColumnVectorIt;
 
@@ -97,6 +100,20 @@ AV* superColumnVectorToAV(SuperColumnVector* super_columns) {
   for(SuperColumnVectorIt it = super_columns->begin(); it != super_columns->end(); it++) {
     av_push(stash, newRV((SV *)superColumnToHV(&*it)));
   }
+  return stash;
+}
+
+HV* stringMapMapToHV(StringMapMap* string_map_map) {
+  HV *stash = (HV *)sv_2mortal((SV *)newHV());
+
+  for (StringMapMapIt it1 = string_map_map->begin(); it1 != string_map_map->end(); it1++) {
+    HV *stash2 = (HV *)sv_2mortal((SV *)newHV());
+    for (StringMapIt it2 = it1->second.begin(); it2 != it1->second.end(); it2++) {
+      hv_store(stash2, it2->first.c_str(), it2->first.size(), newSVpv(it2->second.c_str(), it2->second.size()), 0);
+    }
+    hv_store(stash, it1->first.c_str(), it1->first.size(), newRV((SV *)stash2), 0);
+  }
+
   return stash;
 }
 
@@ -487,6 +504,27 @@ xs_cassandra_keyspace_getName(Keyspace *ks)
 CODE:
   try {
     RETVAL = ks->getName();
+  } catch (InvalidRequestException &e) {
+    croak("InvalidRequestException: %s", e.what());
+  } catch (UnavailableException &e) {
+    croak("UnavailableException: %s", e.what());
+  } catch (TimedOutException &e) {
+    croak("TimedOutException: %s", e.what());
+  } catch (TProtocolException &e) {
+    croak("TProtocolException: %s", e.what());
+  } catch (NotFoundException &e) {
+    croak("NotFoundException: %s", e.what());
+  } catch (TException &e) {
+    croak("TException: %s", e.what());
+  }
+OUTPUT:
+  RETVAL
+
+StringMapMap
+xs_cassandra_keyspace_getDescription(Keyspace *ks)
+CODE:
+  try {
+    RETVAL = ks->getDescription();
   } catch (InvalidRequestException &e) {
     croak("InvalidRequestException: %s", e.what());
   } catch (UnavailableException &e) {

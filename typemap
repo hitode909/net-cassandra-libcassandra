@@ -14,6 +14,7 @@ SlicePredicate * O_OBJECT
 const ColumnPath * O_OBJECT
 StringSet T_STRING_SET
 StringMap T_STRING_MAP
+StringMapMap T_STRING_MAP_MAP
 string T_STDSTRING
 const string T_STDSTRING
 
@@ -28,6 +29,9 @@ T_SUPER_COLUMN
   $var = &PL_sv_undef;
 
 T_SUPER_COLUMN_VECTOR
+  $var = &PL_sv_undef;
+
+T_STRING_MAP_MAP
   $var = &PL_sv_undef;
 
 T_STRING_SET
@@ -128,6 +132,10 @@ T_STRING_MAP
 OUTPUT
 T_STDSTRING
   sv_setpvn($arg, $var.c_str(), $var.size());
+
+T_STRING_MAP_MAP
+    SvSetSV($arg, newRV_noinc((SV *)stringMapMapToHV(&$var)));
+
 
 T_COLUMN
     {
