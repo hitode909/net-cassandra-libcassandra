@@ -59,6 +59,47 @@ sub set_get_delete_value : Test(2) {
     is ($res_not_exist, undef);
 }
 
+sub remove_column : Test(3) {
+    my $self = shift;
+    my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
+    my $key = rand;
+    my $name = rand;
+    my $value = rand;
+    $keyspace->insertColumn($key, "Standard1", "", $name, $value);
+
+    my $res = $keyspace->getColumn($key, "Standard1", "", $name);
+    is $res->value, $value;
+
+    $keyspace->remove($key, "Standard1", "", $name);
+
+    my $res_not_exist = eval {
+        $keyspace->getColumn($key, "Standard1", "", $name);
+    };
+    like $@, qr/NotFoundException/;
+    is ($res_not_exist, undef);
+}
+
+sub remove_super_column : Test(3) {
+    my $self = shift;
+    my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
+    my $key = rand;
+    my $scn = rand;
+    my $name = rand;
+    my $value = rand;
+    $keyspace->insertColumn($key, "Super1", $scn, $name, $value);
+
+    my $res = $keyspace->getColumn($key, "Super1", $scn, $name);
+    is $res->value, $value;
+
+    $keyspace->remove($key, "Super1", $scn, "");
+
+    my $res_not_exist = eval {
+        $keyspace->getColumn($key, "Super1", $scn, $name);
+    };
+    like $@, qr/NotFoundException/;
+    is ($res_not_exist, undef);
+}
+
 sub count_column : Test(2) {
     my $self = shift;
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
