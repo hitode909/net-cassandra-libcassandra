@@ -139,7 +139,7 @@ Keyspace *
 Cassandra::getKeyspace(const string name)
 CODE:
   const char *CLASS = (char*)"Net::Cassandra::libcassandra::Keyspace";
-  RETVAL = THIS->getKeyspace(name);
+  RETVAL = &*(THIS->getKeyspace(name));
 OUTPUT:
   RETVAL
 
