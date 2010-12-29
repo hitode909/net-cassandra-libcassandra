@@ -49,6 +49,9 @@ typedef StringMap::iterator StringMapIt;
 typedef vector<Column> ColumnVector;
 typedef ColumnVector::iterator ColumnVectorIt;
 
+typedef vector<SuperColumn> SuperColumnVector;
+typedef SuperColumnVector::iterator SuperColumnVectorIt;
+
 typedef vector<ColumnOrSuperColumn> ColumnOrSuperColumnVector;
 typedef ColumnOrSuperColumnVector::iterator ColumnOrSuperColumnVectorIt;
 
@@ -401,6 +404,41 @@ CODE:
     pred->slice_range.reversed = reversed;
     pred->slice_range.count = count;
     RETVAL = ks->getSliceRange(key, *col_parent, *pred);
+  } catch (InvalidRequestException &e) {
+    croak("InvalidRequestException: %s", e.what());
+  } catch (UnavailableException &e) {
+    croak("UnavailableException: %s", e.what());
+  } catch (TimedOutException &e) {
+    croak("TimedOutException: %s", e.what());
+  } catch (TProtocolException &e) {
+    croak("TProtocolException: %s", e.what());
+  } catch (NotFoundException &e) {
+    croak("NotFoundException: %s", e.what());
+  } catch (TException &e) {
+    croak("TException: %s", e.what());
+  }
+OUTPUT:
+  RETVAL
+
+SuperColumnVector
+xs_cassandra_keyspace_getSuperSliceRange(Keyspace *ks, const string key, const string column_family, const string super_column, const string start, const string finish, int reversed, int count)
+CODE:
+  try {
+     /* StringVector column_names */
+    ColumnParent* col_parent = new ColumnParent();
+    col_parent->column_family = column_family;
+    col_parent->super_column = super_column;
+    if (super_column.length() > 0) {
+        col_parent->__isset.super_column = true;
+    }
+
+    SlicePredicate *pred = new SlicePredicate();
+    pred->slice_range.start = start;
+    pred->slice_range.finish = finish;
+    pred->slice_range.reversed = reversed;
+    pred->slice_range.count = count;
+
+    RETVAL = ks->getSuperSliceRange(key, *col_parent, *pred);
   } catch (InvalidRequestException &e) {
     croak("InvalidRequestException: %s", e.what());
   } catch (UnavailableException &e) {

@@ -165,7 +165,19 @@ sub slice_super_column_column : Tests {
 }
 
 sub slice_super_column_super_column : Tests {
-    local $TODO = 'not implemented';
+    my $self = shift;
+    my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
+    my $key = rand;
+    for(0..4) {
+        $keyspace->insertColumn($key, "Super1", "super_column".$_ , 'name1-'.$_, 'value1-'.$_);
+        $keyspace->insertColumn($key, "Super1", "super_column".$_ , 'name2-'.$_, 'value2-'.$_);
+    }
+    my $res = $keyspace->getSuperSliceRange($key, "Super1", "", "", "", 0, 3);
+    ok $res;
+    is scalar @$res, 3;
+    isa_ok $res->[0], 'Net::Cassandra::libcassandra::SuperColumn';
+    is $res->[0]->name, 'super_column0';
+    is $res->[0]->columns->[0]->value, 'value1-0';
 }
 
 __PACKAGE__->runtests;

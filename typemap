@@ -6,6 +6,7 @@ ColumnPath * O_OBJECT
 Column T_COLUMN
 SuperColumn T_SUPER_COLUMN
 ColumnVector T_COLUMN_VECTOR
+SuperColumnVector T_SUPER_COLUMN_VECTOR
 ColumnOrSuperColumnVector T_COLUMN_OR_SUPER_COLUMN_VECTOR
 ColumnParent * O_OBJECT
 const ColumnParent * O_OBJECT
@@ -24,6 +25,9 @@ T_COLUMN
   $var = &PL_sv_undef;
 
 T_SUPER_COLUMN
+  $var = &PL_sv_undef;
+
+T_SUPER_COLUMN_VECTOR
   $var = &PL_sv_undef;
 
 T_STRING_SET
@@ -140,6 +144,11 @@ T_COLUMN_VECTOR
     {
         SvSetSV($arg, newRV_noinc((SV *)columnVectorToAV(&$var)));
 
+    }
+
+T_SUPER_COLUMN_VECTOR
+    {
+        SvSetSV($arg, newRV_noinc((SV *)superColumnVectorToAV(&$var)));
     }
 
 T_STRING_SET
