@@ -87,29 +87,6 @@ T_COLUMN_VECTOR
         $var = t_sv;
     }
 
-T_COLUMN_OR_SUPER_COLUMN_VECTOR
-    {
-        AV  *av;
-        I32 len;
-        ColumnOrSuperColumnVector t_sv;
-        if(SvROK($arg) && SvTYPE(SvRV($arg)) == SVt_PVAV){
-            av  = (AV *)SvRV($arg);
-            len = av_len(av) + 1;
-            if(len == 0){
-                warn(\"${Package}::$func_name() -- $var is empty array reference\");
-                XSRETURN_UNDEF;
-            }
-
-        } else {
-            warn(\"${Package}::$func_name() -- $var is not a array reference\");
-            XSRETURN_UNDEF;
-        }
-        for (I32 i = 0; i < len; i++) {
-            t_sv.push_back(string(SvPV_nolen(*av_fetch(av, i, 0))));
-        }
-        $var = t_sv;
-    }
-
 T_STRING_MAP
     {
         HV *hv;
@@ -187,22 +164,6 @@ T_STRING_SET
         AV *av = (AV *)sv_2mortal((SV *)newAV());
         for(StringSetIt it = $var.begin(); it != $var.end(); it++) {
             av_push(av, newSVpvn(it->c_str(), it->size()));
-        }
-        SvSetSV($arg, newRV_noinc((SV *)av));
-    }
-
-T_COLUMN_OR_SUPER_COLUMN_VECTOR
-    {
-        if($var.empty()){
-            warn(\"${Package}::$func_name() -- set is empty\");
-            XSRETURN_UNDEF;
-        }
-
-        AV *av = (AV *)sv_2mortal((SV *)newAV());
-	for(ColumnOrSuperColumnVectorIt it = $var.begin(); it != $var.end(); it++) {
-            SV *sv;
-	    sv_setref_pv( sv, "org::apache::cassandra::Column", &it );
-            av_push(av, sv);
         }
         SvSetSV($arg, newRV_noinc((SV *)av));
     }

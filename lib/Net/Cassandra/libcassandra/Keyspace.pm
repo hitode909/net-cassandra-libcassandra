@@ -50,6 +50,11 @@ sub getSuperSliceRange {
     Net::Cassandra::libcassandra::keyspace_getSuperSliceRange($self, $key, $column_family, $super_column, $start, $finish, $reversed, $count);
 }
 
+sub getColumnOrSuperColumnSliceRange {
+    my ($self, $key, $column_family, $super_column, $start, $finish, $reversed, $count) = @_;
+    Net::Cassandra::libcassandra::keyspace_getColumnOrSuperColumnSliceRange($self, $key, $column_family, $super_column, $start, $finish, $reversed, $count);
+}
+
 sub getCount {
     my ($self, $key, $column_family, $super_column) = @_;
     Net::Cassandra::libcassandra::keyspace_getCount($self, $key, $column_family, $super_column);

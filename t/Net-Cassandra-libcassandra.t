@@ -214,6 +214,36 @@ sub test_slice_standard_column : Test(5) {
 
 }
 
+sub test_slice_cosc_standard_column : Test(5) {
+    my $self = shift;
+    my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
+    my $key = rand;
+    for(0..4) {
+        $keyspace->insertColumn($key, "Standard1", "", 'name'.$_, 'value'.$_);
+    }
+    my $res = $keyspace->getColumnOrSuperColumnSliceRange($key, "Standard1", "", "", "", 0, 3);
+    isa_ok $res->[0], 'Net::Cassandra::libcassandra::ColumnOrSuperColumn';
+    is scalar @$res, 3;
+    is $res->[0]->column->name, 'name0';
+    is $res->[1]->column->name, 'name1';
+    is $res->[2]->column->name, 'name2';
+}
+
+sub test_slice_cosc_super_column : Test(5) {
+    my $self = shift;
+    my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
+    my $key = rand;
+    for(0..4) {
+        $keyspace->insertColumn($key, "Super1", 'scn'.$_, 'name'.$_, 'value'.$_);
+    }
+    my $res = $keyspace->getColumnOrSuperColumnSliceRange($key, "Super1", "", "", "", 0, 3);
+    isa_ok $res->[0], 'Net::Cassandra::libcassandra::ColumnOrSuperColumn';
+    is scalar @$res, 3;
+    is $res->[0]->super_column->name, 'scn0';
+    is $res->[1]->super_column->name, 'scn1';
+    is $res->[2]->super_column->name, 'scn2';
+}
+
 sub test_slice_standard_column_reverse : Test(5) {
     my $self = shift;
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
