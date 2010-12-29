@@ -19,7 +19,7 @@ $keyspace->remove("key", "Standard1", "", "name");
 warn "deleted";
 
 eval {
-    $res = $keyspace->getColumnValue("key", "Standard1", "name");
+    $res = $keyspace->getColumnValue("key", "Standard1", "", "name");
     warn "Value in column retrieved is: ". $res;
 };
 warn $@ if $@;
