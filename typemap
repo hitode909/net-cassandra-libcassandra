@@ -105,7 +105,7 @@ T_STRING_MAP
             if(hv_iterinit(hv) == 0) {
                 warn(\"${Package}::$func_name() -- $var is empty hash reference\");
                 XSRETURN_UNDEF;
-            }  
+            }
         } else {
             warn(\"${Package}::$func_name() -- $var is not a hash reference\");
             XSRETURN_UNDEF;
@@ -127,36 +127,19 @@ T_STDSTRING
 
 T_COLUMN
     {
-        HV *stash = (HV *)sv_2mortal((SV *)newHV());
-        hv_store(stash, "value", strlen("value"), newSVpv($var.value.c_str(), $var.value.size()), 0);
-        hv_store(stash, "name", strlen("name"), newSVpv($var.name.c_str(), $var.name.size()), 0);
-        hv_store(stash, "timestamp", strlen("timestamp"), newSViv($var.timestamp), 0);
-
-        sv_bless( newRV_noinc((SV*)stash), gv_stashpv( "Net::Cassandra::libcassandra::Column", 1 ));
-        SvSetSV($arg, newRV_noinc((SV *)stash));
+        SvSetSV($arg, newRV_noinc((SV *)columnToHV(&$var)));
     }
 
 T_SUPER_COLUMN
     {
-        HV *stash = (HV *)sv_2mortal((SV *)newHV());
-        hv_store(stash, "name", strlen("name"), newSVpv($var.name.c_str(), $var.name.size()), 0);
+        SvSetSV($arg, newRV_noinc((SV *)superColumnToHV(&$var)));
 
-        AV *columns = (AV *)sv_2mortal((SV *)newAV());
+    }
 
-	for(ColumnVectorIt it = $var.columns.begin(); it != $var.columns.end(); it++) {
-            HV *column = (HV *)sv_2mortal((SV *)newHV());
-            hv_store(column, "value", strlen("value"), newSVpv(it->value.c_str(), it->value.size()), 0);
-            hv_store(column, "name", strlen("name"), newSVpv(it->name.c_str(), it->name.size()), 0);
-            hv_store(column, "timestamp", strlen("timestamp"), newSViv(it->timestamp), 0);
+T_COLUMN_VECTOR
+    {
+        SvSetSV($arg, newRV_noinc((SV *)columnVectorToAV(&$var)));
 
-            sv_bless( newRV_noinc((SV*)column), gv_stashpv( "Net::Cassandra::libcassandra::Column", 1 ));
-            av_push(columns, newRV((SV *)column));
-        }
-
-        hv_store(stash, "columns", strlen("columns"), newRV((SV *)columns), 0);
-
-        sv_bless( newRV_noinc((SV*)stash), gv_stashpv( "Net::Cassandra::libcassandra::SuperColumn", 1 ));
-        SvSetSV($arg, newRV_noinc((SV *)stash));
     }
 
 T_STRING_SET
@@ -171,26 +154,6 @@ T_STRING_SET
             av_push(av, newSVpvn(it->c_str(), it->size()));
         }
         SvSetSV($arg, newRV_noinc((SV *)av));
-    }
-
-T_COLUMN_VECTOR
-    {
-        if($var.empty()){
-            warn(\"${Package}::$func_name() -- set is empty\");
-            XSRETURN_UNDEF;
-        }
-
-        AV *columns = (AV *)sv_2mortal((SV *)newAV());
-        for(ColumnVectorIt it = $var.begin(); it != $var.end(); it++) {
-            HV *column = (HV *)sv_2mortal((SV *)newHV());
-            hv_store(column, "value", strlen("value"), newSVpv(it->value.c_str(), it->value.size()), 0);
-            hv_store(column, "name", strlen("name"), newSVpv(it->name.c_str(), it->name.size()), 0);
-            hv_store(column, "timestamp", strlen("timestamp"), newSViv(it->timestamp), 0);
-
-            sv_bless( newRV_noinc((SV*)column), gv_stashpv( "Net::Cassandra::libcassandra::Column", 1 ));
-            av_push(columns, newRV((SV *)column));
-        }
-        SvSetSV($arg, newRV_noinc((SV *)columns));
     }
 
 T_COLUMN_OR_SUPER_COLUMN_VECTOR

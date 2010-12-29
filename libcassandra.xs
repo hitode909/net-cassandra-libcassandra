@@ -52,6 +52,52 @@ typedef ColumnVector::iterator ColumnVectorIt;
 typedef vector<ColumnOrSuperColumn> ColumnOrSuperColumnVector;
 typedef ColumnOrSuperColumnVector::iterator ColumnOrSuperColumnVectorIt;
 
+HV* columnToHV(Column* column) {
+  HV *stash = (HV *)sv_2mortal((SV *)newHV());
+  hv_store(stash, "value", strlen("value"), newSVpv(column->value.c_str(), column->value.size()), 0);
+  hv_store(stash, "name", strlen("name"), newSVpv(column->name.c_str(), column->name.size()), 0);
+  hv_store(stash, "timestamp", strlen("timestamp"), newSViv(column->timestamp), 0);
+
+  sv_bless( newRV_noinc((SV*)stash), gv_stashpv( "Net::Cassandra::libcassandra::Column", 1 ));
+  return stash;
+}
+
+AV* columnVectorToAV(ColumnVector* columns) {
+  AV *stash = (AV *)sv_2mortal((SV *)newAV());
+
+  if (columns->empty()) {
+    return stash;
+  }
+
+  for(ColumnVectorIt it = columns->begin(); it != columns->end(); it++) {
+    av_push(stash, newRV((SV *)columnToHV(&*it)));
+  }
+  return stash;
+}
+
+HV* superColumnToHV(SuperColumn* super_column) {
+  HV *stash = (HV *)sv_2mortal((SV *)newHV());
+  hv_store(stash, "name", strlen("name"), newSVpv(super_column->name.c_str(), super_column->name.size()), 0);
+  hv_store(stash, "columns", strlen("columns"), newRV((SV *)columnVectorToAV(&super_column->columns)), 0);
+
+  sv_bless( newRV_noinc((SV*)stash), gv_stashpv( "Net::Cassandra::libcassandra::SuperColumn", 1 ));
+  return stash;
+}
+
+AV* superColumnVectorToAV(SuperColumnVector* super_columns) {
+  AV *stash = (AV *)sv_2mortal((SV *)newAV());
+
+  if (super_columns->empty()) {
+    return stash;
+  }
+
+  for(SuperColumnVectorIt it = super_columns->begin(); it != super_columns->end(); it++) {
+    av_push(stash, newRV((SV *)superColumnToHV(&*it)));
+  }
+  return stash;
+}
+
+
 MODULE = Net::Cassandra::libcassandra	PACKAGE = Net::Cassandra::libcassandra PREFIX=xs_cassandra_
 ##
 
