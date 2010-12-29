@@ -5,6 +5,7 @@ Keyspace * O_OBJECT
 ColumnPath * O_OBJECT
 Column T_COLUMN
 SuperColumn T_SUPER_COLUMN
+ColumnOrSuperColumn T_COLUMN_OR_SUPER_COLUMN
 ColumnVector T_COLUMN_VECTOR
 SuperColumnVector T_SUPER_COLUMN_VECTOR
 ColumnOrSuperColumnVector T_COLUMN_OR_SUPER_COLUMN_VECTOR
@@ -26,6 +27,12 @@ T_COLUMN
   $var = &PL_sv_undef;
 
 T_SUPER_COLUMN
+  $var = &PL_sv_undef;
+
+T_COLUMN_OR_SUPER_COLUMN
+  $var = &PL_sv_undef;
+
+T_COLUMN_OR_SUPER_COLUMN_VECTOR
   $var = &PL_sv_undef;
 
 T_SUPER_COLUMN_VECTOR
@@ -148,6 +155,12 @@ T_SUPER_COLUMN
 
     }
 
+T_COLUMN_OR_SUPER_COLUMN
+    {
+        SvSetSV($arg, newRV_noinc((SV *)columnOrSuperColumnToHV(&$var)));
+
+    }
+
 T_COLUMN_VECTOR
     {
         SvSetSV($arg, newRV_noinc((SV *)columnVectorToAV(&$var)));
@@ -157,6 +170,11 @@ T_COLUMN_VECTOR
 T_SUPER_COLUMN_VECTOR
     {
         SvSetSV($arg, newRV_noinc((SV *)superColumnVectorToAV(&$var)));
+    }
+
+T_COLUMN_OR_SUPER_COLUMN_VECTOR
+    {
+        SvSetSV($arg, newRV_noinc((SV *)columnOrSuperColumnVectorToAV(&$var)));
     }
 
 T_STRING_SET

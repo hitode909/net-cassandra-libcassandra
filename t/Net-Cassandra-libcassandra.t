@@ -124,6 +124,37 @@ sub test_count_super_column : Tests {
     is($count, 1);
 }
 
+sub test_get_column_or_super_column_column : Test(4) {
+    my $self = shift;
+    my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
+    my $key = rand;
+    my $name = rand;
+    my $value = rand;
+    $keyspace->insertColumn($key, "Standard1", "", $name, $value);
+    my $res = $keyspace->getColumnOrSuperColumn($key, "Standard1", "", $name);
+
+    isa_ok $res, 'Net::Cassandra::libcassandra::ColumnOrSuperColumn';
+    isa_ok $res->column, 'Net::Cassandra::libcassandra::Column';
+    is $res->column->name, $name;
+    is $res->column->value, $value;
+}
+
+sub test_get_column_or_super_column_super_column : Test(4) {
+    my $self = shift;
+    my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
+    my $key = rand;
+    my $scn = rand;
+    my $name = rand;
+    my $value = rand;
+    $keyspace->insertColumn($key, "Super1", $scn, $name, $value);
+    my $res = $keyspace->getColumnOrSuperColumn($key, "Super1", $scn, "");
+
+    isa_ok $res, 'Net::Cassandra::libcassandra::ColumnOrSuperColumn';
+    isa_ok $res->super_column, 'Net::Cassandra::libcassandra::SuperColumn';
+    is $res->super_column->columns->[0]->name, $name;
+    is $res->super_column->columns->[0]->value, $value;
+}
+
 sub test_get_column : Test(4) {
     my $self = shift;
     my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");

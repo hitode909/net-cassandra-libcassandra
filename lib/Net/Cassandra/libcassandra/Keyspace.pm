@@ -20,6 +20,11 @@ sub getColumn {
     Net::Cassandra::libcassandra::keyspace_getColumn($self, $key, $cf, $scn, $cn);
 }
 
+sub getColumnOrSuperColumn {
+    my ($self, $key, $cf, $scn, $cn) = @_;
+    Net::Cassandra::libcassandra::keyspace_getColumnOrSuperColumn($self, $key, $cf, $scn, $cn);
+}
+
 sub getColumnValue {
     my ($self, $key, $cf, $scn, $cn) = @_;
     Net::Cassandra::libcassandra::keyspace_getColumnValue($self, $key, $cf, $scn, $cn);

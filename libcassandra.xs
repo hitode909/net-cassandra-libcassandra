@@ -90,6 +90,32 @@ HV* superColumnToHV(SuperColumn* super_column) {
   return stash;
 }
 
+HV* columnOrSuperColumnToHV(ColumnOrSuperColumn* cosc) {
+  HV *stash = (HV *)sv_2mortal((SV *)newHV());
+  if (cosc->__isset.column) {
+    hv_store(stash, "column", strlen("column"), newRV((SV *)columnToHV(&(cosc->column))), 0);
+  }
+  if (cosc->__isset.super_column) {
+    hv_store(stash, "super_column", strlen("super_column"), newRV((SV *)superColumnToHV(&(cosc->super_column))), 0);
+  }
+
+  sv_bless( newRV_noinc((SV*)stash), gv_stashpv( "Net::Cassandra::libcassandra::ColumnOrSuperColumn", 1 ));
+  return stash;
+}
+
+AV* columnOrSuperColumnVectorToAV(ColumnOrSuperColumnVector* coscs) {
+  AV *stash = (AV *)sv_2mortal((SV *)newAV());
+
+  if (coscs->empty()) {
+    return stash;
+  }
+
+  for(ColumnOrSuperColumnVectorIt it = coscs->begin(); it != coscs->end(); it++) {
+    av_push(stash, newRV((SV *)columnOrSuperColumnToHV(&*it)));
+  }
+  return stash;
+}
+
 AV* superColumnVectorToAV(SuperColumnVector* super_columns) {
   AV *stash = (AV *)sv_2mortal((SV *)newAV());
 
@@ -220,6 +246,28 @@ CODE:
 OUTPUT:
   RETVAL
 
+ColumnOrSuperColumn
+xs_cassandra_keyspace_getColumnOrSuperColumn(Keyspace *ks, const string key, const string column_family, const string super_column_name, const string column_name)
+CODE:
+  const char *CLASS = (char*)(char*)"Net::Cassandra::libcassandra::Column";
+  try {
+    RETVAL = ks->getColumnOrSuperColumn(key, column_family, super_column_name, column_name);
+  } catch (InvalidRequestException &e) {
+    croak("InvalidRequestException: %s", e.what());
+  } catch (UnavailableException &e) {
+    croak("UnavailableException: %s", e.what());
+  } catch (TimedOutException &e) {
+    croak("TimedOutException: %s", e.what());
+  } catch (TProtocolException &e) {
+    croak("TProtocolException: %s", e.what());
+  } catch (NotFoundException &e) {
+    croak("NotFoundException: %s", e.what());
+  } catch (TException &e) {
+    croak("TException: %s", e.what());
+  }
+OUTPUT:
+  RETVAL
+
 string
 xs_cassandra_keyspace_getColumnValue(Keyspace *ks, const string key, const string column_family, const string super_column_name, const string column_name)
 CODE:
@@ -302,6 +350,40 @@ CODE:
     pred->slice_range.reversed = reversed;
     pred->slice_range.count = count;
     RETVAL = ks->getSliceRange(key, *col_parent, *pred);
+  } catch (InvalidRequestException &e) {
+    croak("InvalidRequestException: %s", e.what());
+  } catch (UnavailableException &e) {
+    croak("UnavailableException: %s", e.what());
+  } catch (TimedOutException &e) {
+    croak("TimedOutException: %s", e.what());
+  } catch (TProtocolException &e) {
+    croak("TProtocolException: %s", e.what());
+  } catch (NotFoundException &e) {
+    croak("NotFoundException: %s", e.what());
+  } catch (TException &e) {
+    croak("TException: %s", e.what());
+  }
+OUTPUT:
+  RETVAL
+
+ColumnOrSuperColumnVector
+xs_cassandra_keyspace_getColumnOrSuperColumnSliceRange(Keyspace *ks, const string key, const string column_family, const string super_column, const string start, const string finish, int reversed, int count)
+CODE:
+  try {
+     /* StringVector column_names */
+    ColumnParent* col_parent = new ColumnParent();
+    col_parent->column_family = column_family;
+    col_parent->super_column = super_column;
+    if (super_column.length() > 0) {
+        col_parent->__isset.super_column = true;
+    }
+
+    SlicePredicate *pred = new SlicePredicate();
+    pred->slice_range.start = start;
+    pred->slice_range.finish = finish;
+    pred->slice_range.reversed = reversed;
+    pred->slice_range.count = count;
+    RETVAL = ks->getColumnOrSuperColumnSliceRange(key, *col_parent, *pred);
   } catch (InvalidRequestException &e) {
     croak("InvalidRequestException: %s", e.what());
   } catch (UnavailableException &e) {

@@ -6,6 +6,7 @@ use warnings;
 use Net::Cassandra::libcassandra::Keyspace;
 use Net::Cassandra::libcassandra::Column;
 use Net::Cassandra::libcassandra::SuperColumn;
+use Net::Cassandra::libcassandra::ColumnOrSuperColumn;
 
 require Exporter;
 
