@@ -4,6 +4,7 @@ use warnings;
 use base qw(Test::Class);
 use Path::Class;
 use lib file(__FILE__)->dir->parent->subdir('lib')->stringify;
+use UUID::Tiny;
 
 use Test::More;
 
@@ -301,6 +302,19 @@ sub test_description : Test(7) {
     is $description->{Standard1}->{CompareWith}, 'org.apache.cassandra.db.marshal.BytesType';
     is $description->{Super2}->{Type}, 'Super';
     is $description->{Super2}->{CompareWith}, 'org.apache.cassandra.db.marshal.UTF8Type';
+}
+
+sub test_insert_uuid : Test(1) {
+    my $self = shift;
+    my $keyspace = $self->{cassandra}->getKeyspace("Keyspace1");
+    my $key = rand;
+    for(1..100) {
+        my $cn = UUID::Tiny::create_uuid(UUID::Tiny::UUID_V1);
+        $keyspace->insertColumn($key, "StandardByUUID1", "", $cn, $_);
+    }
+
+    $keyspace->remove($key, "Standard1", "", "");
+    ok 1;
 }
 
 __PACKAGE__->runtests;

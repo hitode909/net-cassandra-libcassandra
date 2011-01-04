@@ -21,7 +21,7 @@ const string T_STDSTRING
 
 INPUT
 T_STDSTRING
-  $var = string(SvPV_nolen($arg));
+  $var = svToString($arg);
 
 T_COLUMN
   $var = &PL_sv_undef;

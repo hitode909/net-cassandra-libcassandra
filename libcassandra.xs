@@ -58,6 +58,11 @@ typedef SuperColumnVector::iterator SuperColumnVectorIt;
 typedef vector<ColumnOrSuperColumn> ColumnOrSuperColumnVector;
 typedef ColumnOrSuperColumnVector::iterator ColumnOrSuperColumnVectorIt;
 
+string svToString(SV* sv) {
+    int len = SvIOK(sv) || SvNOK(sv) ? strlen(SvPV_nolen(sv)) : SvCUR(sv);
+    return string(SvPV_nolen(sv), len);
+}
+
 HV* columnToHV(Column* column) {
   HV *stash = (HV *)sv_2mortal((SV *)newHV());
   hv_store(stash, "value", strlen("value"), newSVpv(column->value.c_str(), column->value.size()), 0);
